@@ -6,6 +6,8 @@ import models.responses.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 import static org.mapstruct.NullValueCheckStrategy.ALWAYS;
 
 @Mapper(
@@ -19,5 +21,7 @@ public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     User toUser(final CreateUserRequest request);
+
+    List<UserResponse> toUserResponseList(List<User> users);
 
 }
