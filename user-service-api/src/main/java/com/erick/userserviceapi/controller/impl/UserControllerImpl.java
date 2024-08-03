@@ -4,6 +4,7 @@ import com.erick.userserviceapi.controller.UserController;
 import com.erick.userserviceapi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import models.requests.CreateUserRequest;
+import models.requests.UpdateUserRequest;
 import models.responses.UserResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,6 +33,11 @@ public class UserControllerImpl implements UserController {
     @Override
     public ResponseEntity<List<UserResponse>> findAll() {
         return ResponseEntity.ok().body(userService.findAll());
+    }
+
+    @Override
+    public ResponseEntity<UserResponse> update(final UpdateUserRequest request, final String id) {
+        return ResponseEntity.ok().body(userService.update(request, id));
     }
 
 }

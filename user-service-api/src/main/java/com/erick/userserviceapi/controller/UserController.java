@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import models.exceptions.StandardError;
 import models.requests.CreateUserRequest;
+import models.requests.UpdateUserRequest;
 import models.responses.UserResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -87,5 +88,37 @@ public interface UserController {
     })
     @GetMapping
     ResponseEntity<List<UserResponse>> findAll();
+
+    @Operation(summary = "Update User")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated",
+                    content = @Content(
+                            mediaType = APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserResponse.class)
+                    )),
+            @ApiResponse(
+                    responseCode = "400", description = "Bad request",
+                    content = @Content(
+                            mediaType = APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = StandardError.class)
+                    )),
+            @ApiResponse(
+                    responseCode = "404", description = "User not found",
+                    content = @Content(
+                            mediaType = APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = StandardError.class)
+                    )),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(
+                            mediaType = APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = StandardError.class)
+                    ))
+    })
+    @PutMapping("/{id}")
+    ResponseEntity<UserResponse> update(
+            @Valid @RequestBody final UpdateUserRequest request,
+            @Parameter(description = "User id", required = true, example = "669b349c02a1551034b185d5")
+            @PathVariable final String id
+    );
 
 }
