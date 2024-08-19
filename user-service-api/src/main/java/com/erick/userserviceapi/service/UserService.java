@@ -9,6 +9,7 @@ import models.requests.CreateUserRequest;
 import models.requests.UpdateUserRequest;
 import models.responses.UserResponse;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,45 +18,48 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
+    private final UserRepository repository;
 
-    private final UserMapper userMapper;
+    private final UserMapper mapper;
+
+    private final BCryptPasswordEncoder encoder;
 
     public UserResponse findById(final String id) {
         User user = find(id);
-        return userMapper.toUserResponse(user);
+        return mapper.toUserResponse(user);
     }
 
     public void save(CreateUserRequest request) {
         verifyIfEmailAlreadyExists(request.email(), null);
-        User user = userMapper.toUser(request);
-        userRepository.save(user);
+        User user = mapper.toUser(request).withPassword(encoder.encode(request.password()));
+        repository.save(user);
     }
 
     public List<UserResponse> findAll() {
-        List<User> users = userRepository.findAll();
+        List<User> users = repository.findAll();
         if (users.isEmpty()) {
             throw new ResourceNotFoundException("No users found");
         }
-        return userMapper.toUserResponseList(users);
+        return mapper.toUserResponseList(users);
     }
 
     public UserResponse update(final UpdateUserRequest request, final String id) {
         User oldUser = find(id);
         verifyIfEmailAlreadyExists(request.email(), id);
-        User newUser = userRepository.save(userMapper.updateToUser(request, oldUser));
-        return userMapper.toUserResponse(newUser);
+        User newUser = repository.save(mapper.updateToUser(request, oldUser)
+                .withPassword(request.password() != null ? encoder.encode(request.password()) : oldUser.getPassword()));
+        return mapper.toUserResponse(newUser);
     }
 
     private User find(String id) {
-        return userRepository.findById(id)
+        return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Object not found. Id: " + id + ", Type: " + UserResponse.class.getSimpleName()
                 ));
     }
 
     private void verifyIfEmailAlreadyExists(final String email, final String id) {
-        userRepository.findByEmail(email)
+        repository.findByEmail(email)
                 .filter(user -> !user.getId().equals(id))
                 .ifPresent(user -> {
                     throw new DataIntegrityViolationException("Email [ " + email + " ] already exists");

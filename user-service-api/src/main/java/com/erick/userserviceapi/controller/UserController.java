@@ -58,6 +58,12 @@ public interface UserController {
                             mediaType = APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = StandardError.class)
                     )),
+            @ApiResponse(
+                    responseCode = "409", description = "Email already exists",
+                    content = @Content(
+                            mediaType = APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = StandardError.class)
+                    )),
             @ApiResponse(responseCode = "500", description = "Internal server error",
                     content = @Content(
                             mediaType = APPLICATION_JSON_VALUE,
@@ -104,6 +110,12 @@ public interface UserController {
                     )),
             @ApiResponse(
                     responseCode = "404", description = "User not found",
+                    content = @Content(
+                            mediaType = APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = StandardError.class)
+                    )),
+            @ApiResponse(
+                    responseCode = "409", description = "Email already exists",
                     content = @Content(
                             mediaType = APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = StandardError.class)
