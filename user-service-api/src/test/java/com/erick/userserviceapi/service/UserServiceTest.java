@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,6 +62,39 @@ class UserServiceTest {
 
         verify(repository, times(1)).findById(anyString());
         verify(mapper, times(0)).toUserResponse(any(User.class));
+    }
+
+    @Test
+    void whenCallFindAllThenReturnListOfUserResponse() {
+        List<User> userEntityList = List.of(new User(), new User());
+        List<UserResponse> userResponseList = List.of(mock(UserResponse.class), mock(UserResponse.class));
+
+        when(repository.findAll()).thenReturn(userEntityList);
+        when(mapper.toUserResponseList(anyList())).thenReturn(userResponseList);
+
+        final List<UserResponse> response = service.findAll();
+
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals(UserResponse.class, response.get(0).getClass());
+
+        verify(repository, times(1)).findAll();
+        verify(mapper, times(1)).toUserResponseList(userEntityList);
+    }
+
+    @Test
+    void whenCallFindAllReturnEmptyListAndThenThrowResourceNotFoundException() {
+        when(repository.findAll()).thenReturn(List.of());
+
+        try {
+            service.findAll();
+        } catch (Exception e) {
+            assertEquals(ResourceNotFoundException.class, e.getClass());
+            assertEquals("No users found", e.getMessage());
+        }
+
+        verify(repository, times(1)).findAll();
+        verify(mapper, times(0)).toUserResponseList(anyList());
     }
 
 }
