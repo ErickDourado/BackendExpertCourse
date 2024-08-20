@@ -3,6 +3,7 @@ package com.erick.userserviceapi.service;
 import com.erick.userserviceapi.entity.User;
 import com.erick.userserviceapi.mapper.UserMapper;
 import com.erick.userserviceapi.repository.UserRepository;
+import models.exceptions.ResourceNotFoundException;
 import models.responses.UserResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -41,10 +42,25 @@ class UserServiceTest {
         final UserResponse response = service.findById("1");
 
         assertNotNull(response);
-        assertEquals(response.getClass(), UserResponse.class);
+        assertEquals(UserResponse.class, response.getClass());
 
         verify(repository, times(1)).findById(anyString());
         verify(mapper, times(1)).toUserResponse(any(User.class));
+    }
+
+    @Test
+    void whenCallFindByIdWithInvalidIdThenThrowResourceNotFoundException() {
+        when(repository.findById(anyString())).thenReturn(Optional.empty());
+
+        try {
+            service.findById("1");
+        } catch (Exception e) {
+            assertEquals(ResourceNotFoundException.class, e.getClass());
+            assertEquals("Object not found. Id: 1, Type: UserResponse", e.getMessage());
+        }
+
+        verify(repository, times(1)).findById(anyString());
+        verify(mapper, times(0)).toUserResponse(any(User.class));
     }
 
 }
