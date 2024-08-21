@@ -4,6 +4,7 @@ import com.erick.userserviceapi.entity.User;
 import com.erick.userserviceapi.mapper.UserMapper;
 import com.erick.userserviceapi.repository.UserRepository;
 import models.exceptions.ResourceNotFoundException;
+import models.requests.CreateUserRequest;
 import models.responses.UserResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.List;
 import java.util.Optional;
 
+import static com.erick.userserviceapi.creator.CreatorUtils.generateMock;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,15 +40,15 @@ class UserServiceTest {
     @Test
     void whenCallFindByIdWithValidIdThenReturnUserResponse() {
         when(repository.findById(anyString())).thenReturn(Optional.of(new User()));
-        when(mapper.toUserResponse(any(User.class))).thenReturn(mock(UserResponse.class));
+        when(mapper.toUserResponse(any(User.class))).thenReturn(generateMock(UserResponse.class));
 
         final UserResponse response = service.findById("1");
 
         assertNotNull(response);
         assertEquals(UserResponse.class, response.getClass());
 
-        verify(repository, times(1)).findById(anyString());
-        verify(mapper, times(1)).toUserResponse(any(User.class));
+        verify(repository).findById(anyString());
+        verify(mapper).toUserResponse(any(User.class));
     }
 
     @Test
@@ -60,14 +62,14 @@ class UserServiceTest {
             assertEquals("Object not found. Id: 1, Type: UserResponse", e.getMessage());
         }
 
-        verify(repository, times(1)).findById(anyString());
+        verify(repository).findById(anyString());
         verify(mapper, times(0)).toUserResponse(any(User.class));
     }
 
     @Test
     void whenCallFindAllThenReturnListOfUserResponse() {
-        List<User> userEntityList = List.of(new User(), new User());
-        List<UserResponse> userResponseList = List.of(mock(UserResponse.class), mock(UserResponse.class));
+        var userEntityList = List.of(new User(), new User());
+        var userResponseList = List.of(generateMock(UserResponse.class), generateMock(UserResponse.class));
 
         when(repository.findAll()).thenReturn(userEntityList);
         when(mapper.toUserResponseList(anyList())).thenReturn(userResponseList);
@@ -78,8 +80,8 @@ class UserServiceTest {
         assertEquals(2, response.size());
         assertEquals(UserResponse.class, response.get(0).getClass());
 
-        verify(repository, times(1)).findAll();
-        verify(mapper, times(1)).toUserResponseList(userEntityList);
+        verify(repository).findAll();
+        verify(mapper).toUserResponseList(userEntityList);
     }
 
     @Test
@@ -93,8 +95,25 @@ class UserServiceTest {
             assertEquals("No users found", e.getMessage());
         }
 
-        verify(repository, times(1)).findAll();
+        verify(repository).findAll();
         verify(mapper, times(0)).toUserResponseList(anyList());
+    }
+
+    @Test
+    void whenCallSaveThenSuccess() {
+        final CreateUserRequest request = generateMock(CreateUserRequest.class);
+
+        when(repository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(mapper.toUser(any())).thenReturn(new User());
+        when(encoder.encode(anyString())).thenReturn("encoded");
+        when(repository.save(any(User.class))).thenReturn(new User());
+
+        service.save(request);
+
+        verify(repository).findByEmail(request.email());
+        verify(mapper).toUser(request);
+        verify(encoder).encode(request.password());
+        verify(repository).save(any(User.class));
     }
 
 }
