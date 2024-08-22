@@ -2,6 +2,8 @@ package com.erick.userserviceapi.controller.impl;
 
 import com.erick.userserviceapi.entity.User;
 import com.erick.userserviceapi.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import models.requests.CreateUserRequest;
 import models.responses.UserResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,9 @@ import java.util.List;
 
 import static com.erick.userserviceapi.creator.CreatorUtils.generateMock;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,6 +32,8 @@ class UserControllerImplTest {
 
     @Autowired
     private UserRepository repository;
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     void testFindByIdWithSuccess() throws Exception {
@@ -74,6 +80,19 @@ class UserControllerImplTest {
                 .andExpect(jsonPath("$[1].profiles").isArray());
 
         repository.deleteAll(entities);
+    }
+
+    @Test
+    void testSaveWithSuccess() throws Exception {
+        final String validEmail = "integrationTest@mail.com";
+        final CreateUserRequest request = generateMock(CreateUserRequest.class).withEmail(validEmail);
+
+        mockMvc.perform(post("/api/users")
+                        .contentType(APPLICATION_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+
+        repository.deleteByEmail(validEmail);
     }
 
 }
