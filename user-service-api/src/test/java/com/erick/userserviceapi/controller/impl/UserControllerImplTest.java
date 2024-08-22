@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static com.erick.userserviceapi.creator.CreatorUtils.generateMock;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -27,20 +28,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class UserControllerImplTest {
 
+    public static final String BASE_PATH = "/api/users";
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private UserRepository repository;
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
     @Test
     void testFindByIdWithSuccess() throws Exception {
         final User entity = generateMock(User.class);
         final String userId = repository.save(entity).getId();
 
-        mockMvc.perform(get("/api/users/{id}", userId))
+        mockMvc.perform(get(BASE_PATH.concat("/{id}"), userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId))
                 .andExpect(jsonPath("$.name").value(entity.getName()))
@@ -55,7 +58,7 @@ class UserControllerImplTest {
     void testFindByIdWithNotFoundException() throws Exception {
         final String id = "123";
         final String expectedMessage = "Object not found. Id: " + id + ", Type: " + UserResponse.class.getSimpleName();
-        final String path = "/api/users/" + id;
+        final String path = BASE_PATH.concat("/").concat(id);
 
         mockMvc.perform(get(path))
                 .andExpect(status().isNotFound())
@@ -71,7 +74,7 @@ class UserControllerImplTest {
         final List<User> entities = List.of(generateMock(User.class), generateMock(User.class));
         repository.saveAll(entities);
 
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get(BASE_PATH))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0]").isNotEmpty())
@@ -87,12 +90,33 @@ class UserControllerImplTest {
         final String validEmail = "integrationTest@mail.com";
         final CreateUserRequest request = generateMock(CreateUserRequest.class).withEmail(validEmail);
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post(BASE_PATH)
                         .contentType(APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(request)))
                 .andExpect(status().isCreated());
 
         repository.deleteByEmail(validEmail);
+    }
+
+    @Test
+    void testSaveWithConflict() throws Exception {
+        final String validEmail = "integrationTest@mail.com";
+        final User entity = generateMock(User.class).withEmail(validEmail);
+        final CreateUserRequest invalidRequest = generateMock(CreateUserRequest.class).withEmail(validEmail);
+
+        repository.save(entity);
+
+        mockMvc.perform(post(BASE_PATH)
+                        .contentType(APPLICATION_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsString(invalidRequest)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.timestamp").isNotEmpty())
+                .andExpect(jsonPath("$.status").value(CONFLICT.value()))
+                .andExpect(jsonPath("$.error").value(CONFLICT.getReasonPhrase()))
+                .andExpect(jsonPath("$.message").value("Email [ " + validEmail + " ] already exists"))
+                .andExpect(jsonPath("$.path").value(BASE_PATH));
+
+        repository.deleteById(entity.getId());
     }
 
 }
