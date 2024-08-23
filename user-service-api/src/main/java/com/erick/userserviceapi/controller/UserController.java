@@ -97,7 +97,8 @@ public interface UserController {
 
     @Operation(summary = "Update User")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User updated",
+            @ApiResponse(
+                    responseCode = "200", description = "User updated",
                     content = @Content(
                             mediaType = APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UserResponse.class)
@@ -120,7 +121,8 @@ public interface UserController {
                             mediaType = APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = StandardError.class)
                     )),
-            @ApiResponse(responseCode = "500", description = "Internal server error",
+            @ApiResponse(
+                    responseCode = "500", description = "Internal server error",
                     content = @Content(
                             mediaType = APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = StandardError.class)
