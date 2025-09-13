@@ -1,5 +1,6 @@
-package com.erick.authserviceapi.security.dtos;
+package com.erick.authserviceapi.security;
 
+import com.erick.authserviceapi.security.dtos.UserDetailsDTO;
 import com.erick.authserviceapi.utils.JWTUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +34,8 @@ public class JWTAuthenticationImpl {
         log.info("Successfully authenticated user: {}", userDetailsDTO.getUsername());
         final var token = jwtUtils.generateToken(userDetailsDTO);
         return AuthenticationResponse.builder()
-                .type("JWT")
-                .token("Bearer " + token)
+                .type("Bearer")
+                .token(token)
                 .build();
     }
 

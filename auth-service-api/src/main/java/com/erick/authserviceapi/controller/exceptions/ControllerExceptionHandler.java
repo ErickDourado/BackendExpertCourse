@@ -1,6 +1,7 @@
 package com.erick.authserviceapi.controller.exceptions;
 
 import jakarta.servlet.http.HttpServletRequest;
+import models.exceptions.RefreshTokenExpiredException;
 import models.exceptions.StandardError;
 import models.exceptions.ValidationError;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,8 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @ControllerAdvice
 public class ControllerExceptionHandler {
 
-    @ExceptionHandler(BadCredentialsException.class)
-    ResponseEntity<StandardError> handleBadCredentialsException(final BadCredentialsException ex,
+    @ExceptionHandler({BadCredentialsException.class, RefreshTokenExpiredException.class})
+    ResponseEntity<StandardError> handleBadCredentialsException(final RuntimeException ex,
                                                                 final HttpServletRequest request) {
         return ResponseEntity.status(UNAUTHORIZED).body(
                 StandardError.builder()
