@@ -1,12 +1,6 @@
 spring:
   application:
     name: 'auth-service-api'
-  data:
-    mongodb:
-      uri: "mongodb+srv://help-desk-user:help-desk-user@clusterhelpdesk.udqxgkt.mongodb.net/helpdeskdb?retryWrites=true&w=majority"
-
-jwt:
-  secret: "dpQBu9ZClwD37oDqxE6yI9smls8XDih4waAG/56MY3l+gteT1+9Ek37cSY6LVJc+v1LWgqalQZTmK/4f9gOz/BWqPSZfUDScPyt2ikqwAP8="
-  expiration: 120_000 # 2 minutes in milliseconds
-  expiration-sec:
-      refresh-token: 3600 # 1 hour in seconds
+  cloud:
+    config:
+      uri: ${CONFIG_SERVER_URI:http://localhost:8888}
