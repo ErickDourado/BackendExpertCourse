@@ -26,7 +26,8 @@ public interface UserController {
 
     @Operation(summary = "Find user by id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User found",
+            @ApiResponse(
+                    responseCode = "200", description = "User found",
                     content = @Content(
                             mediaType = APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UserResponse.class)
@@ -37,7 +38,8 @@ public interface UserController {
                             mediaType = APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = StandardError.class)
                     )),
-            @ApiResponse(responseCode = "500", description = "Internal server error",
+            @ApiResponse(
+                    responseCode = "500", description = "Internal server error",
                     content = @Content(
                             mediaType = APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = StandardError.class)
@@ -64,7 +66,8 @@ public interface UserController {
                             mediaType = APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = StandardError.class)
                     )),
-            @ApiResponse(responseCode = "500", description = "Internal server error",
+            @ApiResponse(
+                    responseCode = "500", description = "Internal server error",
                     content = @Content(
                             mediaType = APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = StandardError.class)
@@ -75,7 +78,8 @@ public interface UserController {
 
     @Operation(summary = "Find all users")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Users found",
+            @ApiResponse(
+                    responseCode = "200", description = "Users found",
                     content = @Content(
                             mediaType = APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = UserResponse.class))
@@ -86,7 +90,8 @@ public interface UserController {
                             mediaType = APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = StandardError.class)
                     )),
-            @ApiResponse(responseCode = "500", description = "Internal server error",
+            @ApiResponse(
+                    responseCode = "500", description = "Internal server error",
                     content = @Content(
                             mediaType = APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = StandardError.class)
