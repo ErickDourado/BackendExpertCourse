@@ -1,20 +1,20 @@
 package com.erick.orderserviceapi.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import models.enums.OrderStatusEnum;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static java.time.LocalDateTime.now;
+import static models.enums.OrderStatusEnum.OPEN;
 
 @Data
 @Builder
@@ -41,6 +41,11 @@ public class Order implements Serializable {
 
     @Column(nullable = false, length = 3000)
     private String description;
+
+    @Builder.Default
+    @Column(nullable = false)
+    @Enumerated(STRING)
+    private OrderStatusEnum status = OPEN;
 
     @Builder.Default
     private LocalDateTime createdAt = now();
